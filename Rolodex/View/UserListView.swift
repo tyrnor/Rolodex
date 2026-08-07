@@ -5,9 +5,12 @@
 //  Created by Carlos Yanez Puig on 07/08/2026.
 //
 
+import SwiftData
 import SwiftUI
 
 struct UserListView: View {
+    @Environment(\.modelContext) var modelContext
+    @Query var users: [User]
     @State private var viewModel = UserListViewModel()
     
     
@@ -17,7 +20,7 @@ struct UserListView: View {
                 if viewModel.isLoading {
                     ProgressView()
                 } else {
-                    List(viewModel.users) { user in
+                    List(users) { user in
                         NavigationLink(value: user) {
                             HStack {
                                 Text(user.name)
@@ -36,7 +39,11 @@ struct UserListView: View {
             .navigationTitle("Rolodex")
         }
         .task {
-            await viewModel.loadUsers()
+            guard users.isEmpty else {return}
+            let downloadedUsers = await viewModel.loadUsers()
+            for user in downloadedUsers {
+                modelContext.insert(user)
+            }
         }
         .alert("Error", isPresented: $viewModel.showingError) {
             
@@ -48,4 +55,5 @@ struct UserListView: View {
 
 #Preview {
     UserListView()
+        .modelContainer(for: User.self, inMemory: true)
 }

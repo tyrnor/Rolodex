@@ -10,7 +10,6 @@ import Observation
 
 @Observable
 class UserListViewModel {
-    var users = [User]()
     private let fetcher: UserFetcher
     var isLoading = false
     var errorMessage = ""
@@ -20,17 +19,16 @@ class UserListViewModel {
         self.fetcher = fetcher
     }
     
-    func loadUsers() async {
-        guard users.isEmpty else { return }
+    func loadUsers() async -> [User] {
         isLoading = true
         defer { isLoading = false }
         
         do {
-            users = try await fetcher.fetch()
+            return try await fetcher.fetch()
         } catch {
-            print("Can't fetch users: \(error.localizedDescription)")
             errorMessage = "There was an error: \(error.localizedDescription)"
             showingError = true
+            return []
         }
     }
 }
