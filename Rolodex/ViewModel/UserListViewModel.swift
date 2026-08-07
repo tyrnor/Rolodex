@@ -12,6 +12,7 @@ import Observation
 class UserListViewModel {
     var users = [User]()
     private let fetcher: UserFetcher
+    var isLoading = false
     var errorMessage = ""
     var showingError = false
     
@@ -20,14 +21,16 @@ class UserListViewModel {
     }
     
     func loadUsers() async {
-        if users.isEmpty {
-            do {
-                users = try await fetcher.fetch()
-            } catch {
-                print("Can't fetch users: \(error.localizedDescription)")
-                errorMessage = "There was an error: \(error.localizedDescription)"
-                showingError = true
-            }
+        guard users.isEmpty else { return }
+        isLoading = true
+        defer { isLoading = false }
+        
+        do {
+            users = try await fetcher.fetch()
+        } catch {
+            print("Can't fetch users: \(error.localizedDescription)")
+            errorMessage = "There was an error: \(error.localizedDescription)"
+            showingError = true
         }
     }
 }
