@@ -30,7 +30,7 @@ struct UserListView: View {
                     }
 
                     .navigationDestination(for: User.self, destination: { user in
-                        
+                        UserDetailView(user: user)
                     })
                 }
             }
