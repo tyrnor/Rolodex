@@ -13,29 +13,36 @@ struct UserListView: View {
     
     var body: some View {
         NavigationStack {
-            List(viewModel.users) { user in
-                NavigationLink(value: user) {
-                    HStack {
-                        Text(user.name)
-                        Spacer()
-                        Circle()
-                            .fill(user.isActive ? .green : .red)
-                            .frame(width: 10, height: 10)
+            Group {
+                if viewModel.isLoading {
+                    ProgressView()
+                } else {
+                    List(viewModel.users) { user in
+                        NavigationLink(value: user) {
+                            HStack {
+                                Text(user.name)
+                                Spacer()
+                                Circle()
+                                    .fill(user.isActive ? .green : .red)
+                                    .frame(width: 10, height: 10)
+                            }
+                        }
                     }
+
+                    .navigationDestination(for: User.self, destination: { user in
+                        
+                    })
                 }
             }
             .navigationTitle("Rolodex")
-            .navigationDestination(for: User.self, destination: { user in
-                
-            })
-            .task {
-                await viewModel.loadUsers()
-            }
-            .alert("Error", isPresented: $viewModel.showingError) {
-                
-            } message: {
-                Text(viewModel.errorMessage)
-            }
+        }
+        .task {
+            await viewModel.loadUsers()
+        }
+        .alert("Error", isPresented: $viewModel.showingError) {
+            
+        } message: {
+            Text(viewModel.errorMessage)
         }
     }
 }
